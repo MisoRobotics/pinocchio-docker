@@ -29,7 +29,6 @@ RUN echo deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub "$(
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys \
     D2486D2DD83DB69272AFE98867170598AF249743 \
     C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 \
-    && add-apt-repository --yes ppa:git-core/ppa \
     && echo deb http://packages.osrfoundation.org/gazebo/ubuntu-stable \
     "$(lsb_release -sc)" main \
     > /etc/apt/sources.list.d/gazebo-latest.list \
