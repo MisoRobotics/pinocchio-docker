@@ -5,24 +5,25 @@ WORKDIR /root/
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm-256color
-ENV APT_CMD="apt-get"
-ENV APT_INST="${APT_CMD} install --assume-yes --no-install-recommends"
 
 # 3. Install common prerequisites.
 RUN apt-get update \
-    && ${APT_INST} \
+    && apt-get install --assume-yes --no-install-recommends \
         build-essential ca-certificates checkinstall cmake curl dpkg-dev \
         g++ gcc git gnupg gnupg2 libtool libssl-dev make \
         software-properties-common doxygen graphviz libeigen3-dev \
         liburdfdom-dev python-dev unzip wget \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/cache/
 
-RUN echo "deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
+RUN echo deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub "$(lsb_release -cs)" robotpkg \
         >> /etc/apt/sources.list.d/robotpkg.list \
     && wget -qO- http://robotpkg.openrobots.org/packages/debian/robotpkg.key | apt-key add - \
     && apt-get update \
-    && ${APT_INST} robotpkg-py27-pinocchio \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install --assume-yes --no-install-recommends robotpkg-py27-pinocchio \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/cache
 
 ENV PATH="/usr/local/bin${PATH:+:${PATH}}"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
