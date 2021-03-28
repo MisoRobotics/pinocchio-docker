@@ -1,4 +1,4 @@
-MAKEFLAGS += --warn-undefined-variables -j$(shell nproc)
+MAKEFLAGS += --warn-undefined-variables
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := all
@@ -7,9 +7,10 @@ SHELL := bash
 CONTAINER ?= pinocchio
 TAG ?= gcr.io/software-builds/pinocchio-docker:latest
 
-export COLOR ?=
-export MAKESILENT ?=
-export VERBOSE ?=
+# Set the workspace that gets mounted when running the container.
+# For example,
+#   WORKSPACE=/home/me/workspace make run
+WORKSPACE ?= $(shell pwd)
 
 this_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
@@ -32,7 +33,10 @@ run:
 	-e QT_X11_NO_MITSHM=1 \
 	-v /tmp/.X11-unix:/tmp/.X11-unix:rw \
 	-v $(HOME)/.Xauthority:/pinocchio/.Xauthority:ro \
-	-v "$$(pwd)":/home/pinocchio/workspace:rw \
+	-v $(WORKSPACE):/home/pinocchio/workspace:rw \
+	-v $(HOME)/.gitconfig:/home/pinocchio/.host.gitconfig:ro \
+	-v $(HOME)/.gitmessage:/home/pinocchio/.gitmessage:ro \
+	-v $(HOME)/.gnupg:/home/pinocchio/.gnpug:rw \
 	--device=/dev/dri \
 	$(TAG) \
 	bash

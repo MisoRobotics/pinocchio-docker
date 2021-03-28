@@ -47,11 +47,21 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/cache
 
+RUN add-apt-repository ppa:git-core/ppa \
+    && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
+    && apt-get install -y --no-install-recommends \
+    bash-completion git git-lfs tig vim \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/cache
+
+RUN wget -qO /etc/bash_completion.d/git-prompt.sh \
+    https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+
 RUN adduser --disabled-password --gecos '' pinocchio
-WORKDIR /home/pinocchio
 RUN chmod g+rw /home && \
     chown -R pinocchio:pinocchio /home/pinocchio
 USER pinocchio
+WORKDIR /home/pinocchio/workspace
 
 ENV PATH="/usr/local/bin${PATH:+:${PATH}}"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
@@ -72,20 +82,29 @@ set visible-stats On' \
 
 RUN echo $'\
 function _my_git_ps1 {\n\
-  __git_ps1 "«$(tput setaf 1)$(tput bold)%s$(tput sgr0)»"\n\
+  __git_ps1 "«$(tput setaf 1)$(tput bold)%s$(tput sgr0)» "\n\
 }\n\
 \n\
 export GIT_PS1_SHOWCOLORHINTS=1\n\
 export GIT_PS1_SHOWDIRTYSTATE=1\n\
 \n\
-DOCKER_PROMPT_TEXT=\n\
+DOCKER_PROMPT=\n\
 if [[ $(grep -c docker /proc/1/cgroup) > 0 ]]; then\n\
-  DOCKER_PROMPT_TEXT=\'\[$(tput setaf 1)$(tput bold)\][docker]\[$(tput sgr0)\] \'\n\
+  DOCKER_PROMPT=\'\[$(tput setaf 1)$(tput bold)\]docker\[$(tput sgr0)\]:\'\n\
 fi\n\
 \n\
-export PS1=\'${debian_chroot:+($debian_chroot)}\
-\[$(tput setaf 2)$(tput bold)\]\u\[$(tput sgr0)\]@\
-\[$(tput setaf 3)$(tput bold)\]\h\[$(tput sgr0)\] \
-\[$(tput setaf 6)$(tput bold)\]\w\[$(tput sgr0)\] \
-\'"${DOCKER_PROMPT_TEXT}"' \
+export PS1=\\\n\
+\'${debian_chroot:+($debian_chroot)}\'\\\n\
+"${DOCKER_PROMPT}"\\\n\
+\'\[$(tput setaf 2)\]\u\[$(tput sgr0)\]@\'\\\n\
+\'\[$(tput setaf 3)\]\h\[$(tput sgr0)\] \'\\\n\
+\'\[$(tput setaf 6)$(tput bold)\]\w\[$(tput sgr0)\] \'\\\n\
+\'$(_my_git_ps1)\'' \
 >> "${HOME}"/.bashrc
+
+USER root
+COPY ./map-gitconfig.sh /map-gitconfig.sh
+RUN chmod +x /map-gitconfig.sh
+USER pinocchio
+ENV ROS_DISTRO=${ROS_DISTRO}
+ENTRYPOINT ["/map-gitconfig.sh"]
