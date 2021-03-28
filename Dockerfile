@@ -82,7 +82,7 @@ set visible-stats On' \
 
 RUN echo $'\
 function _my_git_ps1 {\n\
-  __git_ps1 "«$(tput setaf 1)$(tput bold)%s$(tput sgr0)» "\n\
+  __git_ps1 "«$(tput setaf 213)$(tput bold)%s$(tput sgr0)» "\n\
 }\n\
 \n\
 export GIT_PS1_SHOWCOLORHINTS=1\n\
@@ -103,8 +103,10 @@ export PS1=\\\n\
 >> "${HOME}"/.bashrc
 
 USER root
-COPY ./map-gitconfig.sh /map-gitconfig.sh
-RUN chmod +x /map-gitconfig.sh
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod 555 /entrypoint.sh
+COPY ./pinocchio.art /pinocchio.art
+RUN chmod 444 /pinocchio.art
 USER pinocchio
 ENV ROS_DISTRO=${ROS_DISTRO}
-ENTRYPOINT ["/map-gitconfig.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
