@@ -47,9 +47,45 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/cache
 
+RUN adduser --disabled-password --gecos '' pinocchio
+WORKDIR /home/pinocchio
+RUN chmod g+rw /home && \
+    chown -R pinocchio:pinocchio /home/pinocchio
+USER pinocchio
+
 ENV PATH="/usr/local/bin${PATH:+:${PATH}}"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 ENV LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 ENV PYTHONPATH="/usr/local/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}}"
 ENV CMAKE_PREFIX_PATH="/usr/local${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
 ENV DEBIAN_FRONTEND=
+
+RUN echo $'\
+"\e[5~": history-search-backward\n\
+"\e[6~": history-search-forward\n\
+\n\
+# Bash completion options.\n\
+set colored-stats On\n\
+set mark-symlinked-directories On\n\
+set visible-stats On' \
+>> "${HOME}"/.inputrc
+
+RUN echo $'\
+function _my_git_ps1 {\n\
+  __git_ps1 "«$(tput setaf 1)$(tput bold)%s$(tput sgr0)»"\n\
+}\n\
+\n\
+export GIT_PS1_SHOWCOLORHINTS=1\n\
+export GIT_PS1_SHOWDIRTYSTATE=1\n\
+\n\
+DOCKER_PROMPT_TEXT=\n\
+if [[ $(grep -c docker /proc/1/cgroup) > 0 ]]; then\n\
+  DOCKER_PROMPT_TEXT=\'\[$(tput setaf 1)$(tput bold)\][docker]\[$(tput sgr0)\] \'\n\
+fi\n\
+\n\
+export PS1=\'${debian_chroot:+($debian_chroot)}\
+\[$(tput setaf 2)$(tput bold)\]\u\[$(tput sgr0)\]@\
+\[$(tput setaf 3)$(tput bold)\]\h\[$(tput sgr0)\] \
+\[$(tput setaf 6)$(tput bold)\]\w\[$(tput sgr0)\] \
+\'"${DOCKER_PROMPT_TEXT}"' \
+>> "${HOME}"/.bashrc

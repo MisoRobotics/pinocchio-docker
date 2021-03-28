@@ -18,10 +18,7 @@ this_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 all: build
 
 build: Dockerfile
-	DOCKER_BUILDKIT=1 docker build \
-	-t $(TAG) \
-	--progress=plain \
-	$(this_dir)
+	docker build -t $(TAG) $(this_dir)
 
 run:
 	xhost +local:$(CONTAINER)
@@ -29,12 +26,13 @@ run:
 	--runtime=nvidia \
 	--name=$(CONTAINER) \
 	--network=host \
-	-e "DISPLAY=${DISPLAY}" \
+	-e DISPLAY=$(DISPLAY) \
 	-e NVIDIA_VISIBLE_DEVICES=all \
 	-e NVIDIA_DRIVER_CAPABILITIES=all \
 	-e QT_X11_NO_MITSHM=1 \
 	-v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-	-v ${HOME}/.Xauthority:/root/.Xauthority:ro \
+	-v $(HOME)/.Xauthority:/pinocchio/.Xauthority:ro \
+	-v "$$(pwd)":/home/pinocchio/workspace:rw \
 	--device=/dev/dri \
 	$(TAG) \
 	bash
