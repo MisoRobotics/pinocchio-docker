@@ -7,7 +7,6 @@ WORKDIR /root/
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm-256color
 
-# 3. Install common prerequisites.
 RUN apt-get update \
     && apt-get install --assume-yes --no-install-recommends \
         build-essential ca-certificates checkinstall cmake curl dpkg-dev \
@@ -51,11 +50,14 @@ RUN add-apt-repository ppa:git-core/ppa \
     && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
     && apt-get install -y --no-install-recommends \
     bash-completion git git-lfs tig vim \
+    gdb valgrind \
+    python-{ipython,matplotlib,numpy,pudb,pytest,scipy} \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/cache
 
-RUN wget -qO /etc/bash_completion.d/git-prompt.sh \
-    https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+RUN GIT_VERSION="$(git version | cut -d' ' -f3 -)" \
+    && wget -qO /etc/bash_completion.d/git-prompt.sh \
+    https://raw.githubusercontent.com/git/git/v"${GIT_VERSION}"/contrib/completion/git-prompt.sh
 
 RUN adduser --disabled-password --gecos '' pinocchio
 RUN chmod g+rw /home && \
