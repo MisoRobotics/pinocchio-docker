@@ -1,3 +1,3 @@
-# pinocchio-docker
+# pinocchio-ros
 
-Docker build for Pinocchio Rigid-Body Dynamics Framework.
+Docker build for Pinocchio Rigid-Body Dynamics Framework along with ROS.
