@@ -139,6 +139,17 @@ USER root
 # Add passwordless sudo.
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
     /etc/sudoers
+    
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2.tar.gz && \
+    tar -zxvf cmake-3.20.2.tar.gz && \
+    cd cmake-3.20.2 && \
+    ls && \
+    ./bootstrap && \
+    make && \
+    make -j6 && \
+    sudo make install && \
+    sudo apt-get install ros-melodic-moveit ros-melodic-uuid-msgs python-pip  && \
+    pip install xmltodict
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod 555 /entrypoint.sh
