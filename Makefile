@@ -4,8 +4,8 @@ SHELL := bash
 .DEFAULT_GOAL := all
 .SUFFIXES:
 
-CONTAINER ?= pinocchio
-TAG ?= gcr.io/software-builds/pinocchio-docker:latest
+CONTAINER ?= flippy
+TAG ?= gcr.io/software-builds/flippy-docker:latest
 
 # Set the workspace that gets mounted when running the container.
 # For example,
