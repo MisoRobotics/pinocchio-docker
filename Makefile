@@ -4,13 +4,13 @@ SHELL := bash
 .DEFAULT_GOAL := all
 .SUFFIXES:
 
-CONTAINER ?= flippy
-TAG ?= gcr.io/software-builds/flippy-docker:latest
+CONTAINER ?= sim_breakout
+TAG ?= gcr.io/software-builds/sim_breakout-docker:latest
 
 # Set the workspace that gets mounted when running the container.
 # For example,
 #   WORKSPACE=/home/me/workspace make run
-WORKSPACE = /home/asinglet/sim_breakout/workspace
+WORKSPACE = $(HOME)/sim_breakout/workspace
 
 this_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
@@ -18,8 +18,16 @@ this_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 all: build
 
+# build: Dockerfile
+# 	docker build -t $(TAG) $(this_dir) --ssh default=$(SSH_AUTH_SOCK)
+
 build: Dockerfile
-	docker build -t $(TAG) $(this_dir)
+	DOCKER_BUILDKIT=1 docker build \
+	--ssh=default \
+	--network=host \
+	--progress=plain \
+	--tag=$(TAG) \
+	--add-host=miso-apt:10.0.0.2 .
 
 run: check-workspace-dir
 	xhost +local:$(CONTAINER)
